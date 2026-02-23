@@ -1,0 +1,12 @@
+C:\Users\daniel_wu\Project\Apidiff\src\ApiDiff.Core\bin\Release\net8.0\ApiDiff.Core.deps.json
+C:\Users\daniel_wu\Project\Apidiff\src\ApiDiff.Core\bin\Release\net8.0\ApiDiff.Core.dll
+C:\Users\daniel_wu\Project\Apidiff\src\ApiDiff.Core\bin\Release\net8.0\ApiDiff.Core.pdb
+C:\Users\daniel_wu\Project\Apidiff\src\ApiDiff.Core\obj\Release\net8.0\ApiDiff.Core.csproj.AssemblyReference.cache
+C:\Users\daniel_wu\Project\Apidiff\src\ApiDiff.Core\obj\Release\net8.0\ApiDiff.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\daniel_wu\Project\Apidiff\src\ApiDiff.Core\obj\Release\net8.0\ApiDiff.Core.AssemblyInfoInputs.cache
+C:\Users\daniel_wu\Project\Apidiff\src\ApiDiff.Core\obj\Release\net8.0\ApiDiff.Core.AssemblyInfo.cs
+C:\Users\daniel_wu\Project\Apidiff\src\ApiDiff.Core\obj\Release\net8.0\ApiDiff.Core.csproj.CoreCompileInputs.cache
+C:\Users\daniel_wu\Project\Apidiff\src\ApiDiff.Core\obj\Release\net8.0\ApiDiff.Core.dll
+C:\Users\daniel_wu\Project\Apidiff\src\ApiDiff.Core\obj\Release\net8.0\refint\ApiDiff.Core.dll
+C:\Users\daniel_wu\Project\Apidiff\src\ApiDiff.Core\obj\Release\net8.0\ApiDiff.Core.pdb
+C:\Users\daniel_wu\Project\Apidiff\src\ApiDiff.Core\obj\Release\net8.0\ref\ApiDiff.Core.dll

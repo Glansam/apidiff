@@ -1,0 +1,75 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "ApiDiff.Core/1.0.0": {
+        "dependencies": {
+          "Microsoft.OpenApi.Readers": "1.6.28"
+        },
+        "runtime": {
+          "ApiDiff.Core.dll": {}
+        }
+      },
+      "Microsoft.OpenApi/1.6.28": {
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.OpenApi.dll": {
+            "assemblyVersion": "1.6.28.0",
+            "fileVersion": "1.6.28.0"
+          }
+        }
+      },
+      "Microsoft.OpenApi.Readers/1.6.28": {
+        "dependencies": {
+          "Microsoft.OpenApi": "1.6.28",
+          "SharpYaml": "2.1.1"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.OpenApi.Readers.dll": {
+            "assemblyVersion": "1.6.28.0",
+            "fileVersion": "1.6.28.0"
+          }
+        }
+      },
+      "SharpYaml/2.1.1": {
+        "runtime": {
+          "lib/netstandard2.0/SharpYaml.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.1.1.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "ApiDiff.Core/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.OpenApi/1.6.28": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-qJX/Ge76pWsAGAx6pomlNs3W3KJsdjeOEmMolLSefm2g5noUCFLP+sXzB7MQwYVTBWjzGF8boL2iG6eCVmP+1Q==",
+      "path": "microsoft.openapi/1.6.28",
+      "hashPath": "microsoft.openapi.1.6.28.nupkg.sha512"
+    },
+    "Microsoft.OpenApi.Readers/1.6.28": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Cr3fyrUX4g3Envix0zPiS31f5QxyaS4U/tRJh5yDLr7SleluM+2RrqugmzLhEM834c4dFVaI4oDPfmrkLAkzjA==",
+      "path": "microsoft.openapi.readers/1.6.28",
+      "hashPath": "microsoft.openapi.readers.1.6.28.nupkg.sha512"
+    },
+    "SharpYaml/2.1.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-BISoFuW2AwZYXxrZGaBnedo21BvrdgC4kkWd6QYrOdhOGSsZB0RSqcBw09l9caUE1g3sykJoRfSbtSzZS6tYig==",
+      "path": "sharpyaml/2.1.1",
+      "hashPath": "sharpyaml.2.1.1.nupkg.sha512"
+    }
+  }
+}
