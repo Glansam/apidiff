@@ -9,6 +9,8 @@ var app = builder.Build();
 
 app.MapGet("/", () => Results.Ok("OK - apidiff license webhook is running"));
 
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+
 app.MapPost("/gumroad-webhook", async (HttpRequest request) =>
 {
     var gumroadSecret = builder.Configuration["GUMROAD_SECRET"];
