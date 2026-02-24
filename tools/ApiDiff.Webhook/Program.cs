@@ -17,33 +17,45 @@ app.MapGet("/health", () =>
 
 app.MapPost("/gumroad-webhook", async (HttpRequest request) =>
 {
+    app.Logger.LogInformation("⬇️ Received POST request to /gumroad-webhook");
+
     var gumroadSecret = builder.Configuration["GUMROAD_SECRET"];
     if (string.IsNullOrEmpty(gumroadSecret))
     {
+        app.Logger.LogWarning("❌ GUMROAD_SECRET environment variable is missing.");
         return Results.StatusCode(500);
     }
 
-    // 1. Read request body
-    using var reader = new StreamReader(request.Body);
-    var body = await reader.ReadToEndAsync();
+    // 1. Enable buffering so we can read the body twice (once for HMAC, once for Form parsing)
+    request.EnableBuffering();
 
-    // 2. Validate Signature
+    // 2. Read request body for signature validation
+    using var reader = new StreamReader(request.Body, Encoding.UTF8, leaveOpen: true);
+    var body = await reader.ReadToEndAsync();
+    
+    // Reset stream position for the next reader (FormReader)
+    request.Body.Position = 0;
+
+    // 3. Validate Signature
     if (!request.Headers.TryGetValue("X-Gumroad-Signature", out var signatureHeader))
     {
+        app.Logger.LogWarning("❌ Missing X-Gumroad-Signature header.");
         return Results.Unauthorized();
     }
 
     var expectedSignature = CreateSignature(body, gumroadSecret);
     if (signatureHeader.ToString() != expectedSignature)
     {
+        app.Logger.LogWarning("❌ Signature mismatch. Expected: {Expected}, Got: {Actual}", expectedSignature, signatureHeader.ToString());
         return Results.Unauthorized();
     }
+    
+    app.Logger.LogInformation("✅ Signature verified successfully.");
 
-    // 3. Parse Body (FormUrlEncoded usually for Gumroad)
-    // For simplicity, assuming JSON or we can use Form parsing if needed.
-    // Gumroad usually sends application/x-www-form-urlencoded
+    // 4. Parse Form Body
     if (!request.HasFormContentType)
     {
+        app.Logger.LogWarning("❌ Unsupported content type: {ContentType}", request.ContentType);
         return Results.BadRequest(new { error = "Unsupported content type" });
     }
 
@@ -52,13 +64,17 @@ app.MapPost("/gumroad-webhook", async (HttpRequest request) =>
     
     if (string.IsNullOrEmpty(email))
     {
+        app.Logger.LogWarning("❌ Email field not found in form data.");
         return Results.BadRequest(new { error = "Email not found" });
     }
 
-    // 4. Generate License
+    app.Logger.LogInformation("✅ Preparing to generate license for: {Email}", email);
+
+    // 5. Generate License
     var privateKeyBase64 = builder.Configuration["APIDIFF_PRIVATE_KEY"];
     if (string.IsNullOrEmpty(privateKeyBase64))
     {
+        app.Logger.LogWarning("❌ APIDIFF_PRIVATE_KEY environment variable is missing.");
         return Results.StatusCode(500);
     }
     
@@ -66,7 +82,7 @@ app.MapPost("/gumroad-webhook", async (HttpRequest request) =>
     {
         var licenseKey = GenerateLicenseKey(email, privateKeyBase64);
         
-        // 5. Send Email via Service (TODO: Implement actual sending, e.g. SendGrid)
+        // 6. Send Email via Service (TODO: Implement actual sending, e.g. SendGrid)
         app.Logger.LogInformation("[Mock Email Send] To: {Email}", email);
         app.Logger.LogInformation("[Mock Email Send] Body: Your ApiDiff Pro License Key: {LicenseKey}", licenseKey);
 
@@ -74,7 +90,7 @@ app.MapPost("/gumroad-webhook", async (HttpRequest request) =>
     }
     catch (Exception ex)
     {
-        app.Logger.LogError(ex, "Error generating license");
+        app.Logger.LogError(ex, "❌ Error generating license");
         return Results.StatusCode(500);
     }
 });
