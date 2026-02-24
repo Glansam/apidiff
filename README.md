@@ -16,12 +16,12 @@ BREAKING: DELETE /users/{id} removed
 BREAKING: required field 'email' added to request body for POST /users (application/json)
 ```
 
-### Catch Breaking Changes in CI
-The Pro version of ApiDiff includes the `--fail-on-breaking` flag, which automatically exits with a non-zero code to block PRs that break API contracts.
+## Catch Breaking Changes in CI
+
+Use `--fail-on-breaking` to block pull requests that introduce breaking API changes.
 
 ```bash
-# Block CI if breaking changes are introduced:
-> apidiff compare --old prev.json --new curr.json --fail-on-breaking
+apidiff compare --old prev.json --new curr.json --fail-on-breaking
 ```
 
 **GitHub Actions Example:**
@@ -30,6 +30,12 @@ The Pro version of ApiDiff includes the `--fail-on-breaking` flag, which automat
   run: |
     apidiff compare --old prev.json --new curr.json --fail-on-breaking
 ```
+
+### Exit Codes
+
+- `0`: No breaking changes detected (or `--fail-on-breaking` not specified)
+- `2`: Breaking changes detected (with `--fail-on-breaking`)
+- `64`: Invalid arguments or file processing error
 
 ### Installation (Global Tool)
 ```bash
@@ -41,11 +47,6 @@ If you haven't installed it globally, you can run it directly from source:
 ```bash
 dotnet run --project src/ApiDiff.Cli/ApiDiff.Cli.csproj compare --old prev.json --new curr.json
 ```
-
-### Exit Codes
-- `0`: No breaking changes (or `fail-on-breaking` not specified)
-- `2`: Breaking changes detected (with `--fail-on-breaking` flag)
-- `64`: Invalid arguments or file processing error
 
 ### Supported Specs
 - Supports OpenAPI 3.x (JSON)
