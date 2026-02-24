@@ -22,6 +22,18 @@ public class DiffEngineRulesTests
     }
 
     [Fact]
+    public void Rule2Extension_RequestBodyBecameRequired_ShouldReturnBreakingEvent()
+    {
+        var oldJson = @"{ ""openapi"": ""3.0.0"", ""paths"": { ""/users"": { ""post"": { ""requestBody"": { ""required"": false, ""content"": { ""application/json"": { ""schema"": { ""type"": ""object"" } } } } } } } }";
+        var newJson = @"{ ""openapi"": ""3.0.0"", ""paths"": { ""/users"": { ""post"": { ""requestBody"": { ""required"": true, ""content"": { ""application/json"": { ""schema"": { ""type"": ""object"" } } } } } } } }";
+
+        var results = _engine.Compare(oldJson, newJson).ToList();
+
+        Assert.Single(results);
+        Assert.Equal("BREAKING: request body became required for POST /users", results[0].Message);
+    }
+
+    [Fact]
     public void Rule3_RequestFieldTypeChanged_ShouldReturnBreakingEvent()
     {
         var oldJson = @"{ ""openapi"": ""3.0.0"", ""paths"": { ""/users"": { ""post"": { ""requestBody"": { ""content"": { ""application/json"": { ""schema"": { ""type"": ""object"", ""properties"": { ""age"": { ""type"": ""string"" } } } } } } } } } }";

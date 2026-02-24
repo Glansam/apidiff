@@ -25,6 +25,10 @@ public sealed class RequestBodyAddedRule : IApiDiffRule
                     yield return new DiffEvent($"BREAKING: {key} added a required request body", DiffSeverity.Breaking);
                 }
             }
+            else if ((oldOp.RequestBody?.Required ?? false) == false && (newOp.RequestBody?.Required ?? false) == true)
+            {
+                yield return new DiffEvent($"BREAKING: request body became required for {key}", DiffSeverity.Breaking);
+            }
         }
     }
 
