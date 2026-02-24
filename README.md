@@ -1,5 +1,8 @@
 # ApiDiff
 
+<div align="center">
+  <img src="assets/apidiff-logo.png" alt="ApiDiff Logo" width="300" />
+</div>
 **Stop breaking your downstream clients.**
 
 ApiDiff is a lightning-fast CLI tool that compares two OpenAPI/Swagger specifications and immediately highlights the breaking changes. Perfect for local development or integrating into your CI pipeline to catch API contract violations before they reach production.
