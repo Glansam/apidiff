@@ -19,7 +19,7 @@
     <ToolCommandName>apidiff</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
     <Version>0.2.0</Version>
-    <Authors>ApiDiff Team</Authors>
+    <Authors>Glansam</Authors>
     <Description>A lightning-fast CLI tool that compares two OpenAPI/Swagger specifications and immediately highlights the breaking changes.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/Glansam/apidiff</RepositoryUrl>
@@ -27,7 +27,7 @@
     <PackageProjectUrl>https://github.com/Glansam/apidiff</PackageProjectUrl>
     <PackageTags>openapi;swagger;api;diff;breaking-changes;cli</PackageTags>
     <PackageReleaseNotes>Initial public release of ApiDiff CLI featuring 5 core rules and RSA licensing.</PackageReleaseNotes>
-    <Copyright>Copyright (c) 2026 ApiDiff Team</Copyright>
+    <Copyright>Copyright (c) 2026 Glansam</Copyright>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
