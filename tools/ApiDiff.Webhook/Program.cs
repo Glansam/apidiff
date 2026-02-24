@@ -9,7 +9,11 @@ var app = builder.Build();
 
 app.MapGet("/", () => Results.Ok("OK - apidiff license webhook is running"));
 
-app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+app.MapGet("/health", () => 
+{
+    app.Logger.LogInformation("✅ [TEST LOG] The /health endpoint was just called!");
+    return Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow });
+});
 
 app.MapPost("/gumroad-webhook", async (HttpRequest request) =>
 {
