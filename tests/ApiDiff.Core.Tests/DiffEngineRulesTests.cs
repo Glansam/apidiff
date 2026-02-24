@@ -18,7 +18,7 @@ public class DiffEngineRulesTests
         var results = _engine.Compare(oldJson, newJson).ToList();
 
         Assert.Single(results);
-        Assert.Equal("BREAKING: POST /users request added required field 'name'", results[0].Message);
+        Assert.Equal("BREAKING: required field 'name' added to request body for POST /users (application/json)", results[0].Message);
     }
 
     [Fact]
