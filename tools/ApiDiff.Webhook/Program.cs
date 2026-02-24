@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
+app.MapGet("/", () => Results.Ok("OK - apidiff license webhook is running"));
+
 app.MapPost("/gumroad-webhook", async (HttpRequest request) =>
 {
     var gumroadSecret = builder.Configuration["GUMROAD_SECRET"];
