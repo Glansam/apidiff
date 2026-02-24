@@ -32,15 +32,21 @@ class Program
             name: "--fail-on-breaking",
             description: "Exit with code 1 if any breaking changes are detected.");
 
+        var formatOption = new Option<string>(
+            name: "--format",
+            getDefaultValue: () => "text",
+            description: "Output format: text, json, or markdown.");
+
         var compareCommand = new Command("compare", "Compare two OpenAPI specifications for breaking changes.")
         {
             oldOption,
             newOption,
             outOption,
-            failOnBreakingOption
+            failOnBreakingOption,
+            formatOption
         };
 
-        compareCommand.SetHandler(async (oldInput, newInput, outFile, failOnBreaking) =>
+        compareCommand.SetHandler(async (oldInput, newInput, outFile, failOnBreaking, format) =>
         {
             try
             {
@@ -48,9 +54,9 @@ class Program
                 var isTestEnv = Environment.GetEnvironmentVariable("APIDIFF_TEST_ENV") == "1";
                 if (!isTestEnv)
                 {
-                    if (outFile != null)
+                    if (outFile != null || format.Equals("markdown", StringComparison.OrdinalIgnoreCase) || format.Equals("json", StringComparison.OrdinalIgnoreCase))
                     {
-                        LicenseValidator.EnsurePro("Markdown Reporting");
+                        LicenseValidator.EnsurePro("Advanced Reporting");
                     }
                     if (failOnBreaking)
                     {
@@ -68,57 +74,99 @@ class Program
                 var engine = new DiffEngine();
                 var results = engine.Compare(oldJson, newJson).ToList();
 
-                bool hasBreaking = false;
-                var markdownReport = new StringBuilder();
-                markdownReport.AppendLine("# API Breaking Change Report\n");
-
                 var breakingCount = results.Count(r => r.Severity == DiffSeverity.Breaking);
-                if (breakingCount > 0)
-                {
-                    Console.WriteLine($"Found {breakingCount} breaking change(s).");
-                }
+                var warningCount = results.Count(r => r.Severity == DiffSeverity.Warning);
+                var infoCount = results.Count(r => r.Severity == DiffSeverity.Info);
+                bool hasBreaking = breakingCount > 0;
 
-                foreach (var result in results)
-                {
-                    if (result.Severity == DiffSeverity.Breaking)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        hasBreaking = true;
-                        markdownReport.AppendLine($"- 🛑 **BREAKING**: {result.Message.Replace("BREAKING: ", "")}");
-                    }
-                    else if (result.Severity == DiffSeverity.Warning)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        markdownReport.AppendLine($"- ⚠️ **WARNING**: {result.Message.Replace("WARNING: ", "")}");
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Gray;
-                        markdownReport.AppendLine($"- ℹ️ **INFO**: {result.Message}");
-                    }
+                string outputContent = "";
 
-                    Console.WriteLine(result.Message);
-                    Console.ResetColor();
+                if (format.Equals("json", StringComparison.OrdinalIgnoreCase))
+                {
+                    var report = new
+                    {
+                        tool = new { name = "ApiDiff", version = "0.1.1" },
+                        summary = new { breaking = breakingCount, warning = warningCount, info = infoCount },
+                        findings = results
+                    };
+                    outputContent = System.Text.Json.JsonSerializer.Serialize(report, new System.Text.Json.JsonSerializerOptions 
+                    { 
+                        WriteIndented = true, 
+                        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+                        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                    });
                 }
+                else if (format.Equals("markdown", StringComparison.OrdinalIgnoreCase))
+                {
+                    var md = new StringBuilder();
+                    md.AppendLine("## ApiDiff Report\n");
+                    md.AppendLine($"**Summary:** {breakingCount} breaking, {warningCount} warnings, {infoCount} info\n");
+                    
+                    if (hasBreaking)
+                    {
+                        md.AppendLine($"### ❌ Breaking changes ({breakingCount})");
+                        foreach (var r in results.Where(x => x.Severity == DiffSeverity.Breaking))
+                        {
+                            var op = r.Operation != null ? $"**{r.Operation.Method} {r.Operation.Path}** — " : "";
+                            md.AppendLine($"- {op}{r.Message.Replace("BREAKING: ", "")}");
+                        }
+                    }
+                    outputContent = md.ToString();
+                }
+                else // text
+                {
+                    var textOutput = new StringBuilder();
+                    if (breakingCount > 0)
+                    {
+                        textOutput.AppendLine($"Found {breakingCount} breaking change(s).");
+                    }
+                    foreach (var result in results)
+                    {
+                        textOutput.AppendLine(result.Message);
+                    }
+                    if (!results.Any())
+                    {
+                        textOutput.AppendLine("✅ No breaking changes detected.");
+                    }
+                    outputContent = textOutput.ToString().TrimEnd();
 
-                if (!results.Any())
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("No breaking changes detected.");
-                    Console.ResetColor();
-                    markdownReport.AppendLine("✅ No breaking changes detected.");
-                }
-                else if (failOnBreaking && hasBreaking)
-                {
-                    Environment.ExitCode = 2;
+                    // For console text format, we still want colorized output if writing to stdout
+                    if (outFile == null)
+                    {
+                        if (breakingCount > 0) Console.WriteLine($"Found {breakingCount} breaking change(s).");
+                        foreach (var result in results)
+                        {
+                            if (result.Severity == DiffSeverity.Breaking) Console.ForegroundColor = ConsoleColor.Red;
+                            else if (result.Severity == DiffSeverity.Warning) Console.ForegroundColor = ConsoleColor.Yellow;
+                            else Console.ForegroundColor = ConsoleColor.Gray;
+
+                            Console.WriteLine(result.Message);
+                            Console.ResetColor();
+                        }
+                        if (!results.Any())
+                        {
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine("No breaking changes detected.");
+                            Console.ResetColor();
+                        }
+                    }
                 }
 
                 if (outFile != null)
                 {
-                    await File.WriteAllTextAsync(outFile.FullName, markdownReport.ToString());
+                    await File.WriteAllTextAsync(outFile.FullName, outputContent);
                     Console.ForegroundColor = ConsoleColor.Cyan;
                     Console.WriteLine($"\nReport generated at: {outFile.FullName}");
                     Console.ResetColor();
+                }
+                else if (!format.Equals("text", StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine(outputContent);
+                }
+
+                if (failOnBreaking && hasBreaking)
+                {
+                    Environment.ExitCode = 2;
                 }
             }
             catch (Exception ex)
@@ -128,7 +176,7 @@ class Program
                 Console.ResetColor();
                 Environment.ExitCode = 64; // Set 64 for file/processing errors
             }
-        }, oldOption, newOption, outOption, failOnBreakingOption);
+        }, oldOption, newOption, outOption, failOnBreakingOption, formatOption);
 
         var rootCommand = new RootCommand("API Breaking Change Detector");
         rootCommand.AddCommand(compareCommand);

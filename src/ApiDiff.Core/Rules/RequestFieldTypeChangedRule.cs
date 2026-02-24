@@ -27,7 +27,17 @@ public sealed class RequestFieldTypeChangedRule : IApiDiffRule
                         var oldProp = prop.Value;
                         if (oldProp.Type != newProp.Type)
                         {
-                            yield return new DiffEvent($"BREAKING: {key} request field '{prop.Key}' changed type from {oldProp.Type ?? "null"} to {newProp.Type ?? "null"}", DiffSeverity.Breaking);
+                            yield return new DiffEvent(DiffSeverity.Breaking, "REQ_FIELD_TYPE_CHANGED", $"BREAKING: {key} request field '{prop.Key}' changed type from {oldProp.Type ?? "null"} to {newProp.Type ?? "null"}")
+                            {
+                                Operation = new DiffOperation { Method = method.ToString().ToUpperInvariant(), Path = path },
+                                Location = new DiffLocation { Area = "requestBody", ContentType = "application/json" },
+                                Details = new Dictionary<string, object> 
+                                { 
+                                    { "field", prop.Key },
+                                    { "oldType", oldProp.Type ?? "null" },
+                                    { "newType", newProp.Type ?? "null" }
+                                }
+                            };
                         }
                     }
                 }

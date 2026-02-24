@@ -35,7 +35,16 @@ public sealed class RequestEnumValueRemovedRule : IApiDiffRule
                             {
                                 if (!newEnums.Contains(oldEnum))
                                 {
-                                    yield return new DiffEvent($"BREAKING: {key} request field '{prop.Key}' removed enum value '{oldEnum}'", DiffSeverity.Breaking);
+                                    yield return new DiffEvent(DiffSeverity.Breaking, "REQ_ENUM_VALUE_REMOVED", $"BREAKING: {key} request field '{prop.Key}' removed enum value '{oldEnum}'")
+                                    {
+                                        Operation = new DiffOperation { Method = method.ToString().ToUpperInvariant(), Path = path },
+                                        Location = new DiffLocation { Area = "requestBody", ContentType = "application/json" },
+                                        Details = new Dictionary<string, object> 
+                                        { 
+                                            { "field", prop.Key },
+                                            { "removedValue", oldEnum }
+                                        }
+                                    };
                                 }
                             }
                         }

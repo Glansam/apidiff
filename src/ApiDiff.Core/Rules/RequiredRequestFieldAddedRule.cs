@@ -30,9 +30,12 @@ public sealed class RequiredRequestFieldAddedRule : IApiDiffRule
 
             foreach (var field in added)
             {
-                yield return new DiffEvent(
-                    $"BREAKING: required field '{field}' added to request body for {method.ToString().ToUpperInvariant()} {path} (application/json)", 
-                    DiffSeverity.Breaking);
+                yield return new DiffEvent(DiffSeverity.Breaking, "REQ_FIELD_ADDED", $"BREAKING: required field '{field}' added to request body for {method.ToString().ToUpperInvariant()} {path} (application/json)")
+                {
+                    Operation = new DiffOperation { Method = method.ToString().ToUpperInvariant(), Path = path },
+                    Location = new DiffLocation { Area = "requestBody", ContentType = "application/json" },
+                    Details = new Dictionary<string, object> { { "field", field } }
+                };
             }
         }
     }

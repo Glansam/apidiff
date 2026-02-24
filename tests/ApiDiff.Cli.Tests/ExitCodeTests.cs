@@ -133,4 +133,31 @@ public class ExitCodeTests : IDisposable
         Assert.Equal(64, result.ExitCode);
         Assert.Contains("Error:", result.StdErr); // Should output to stderr now
     }
+
+    [Fact]
+    public void Compare_WithJsonFormat_ReturnsValidJson()
+    {
+        var oldSchema = @"{ ""openapi"": ""3.0.0"", ""paths"": { ""/users"": { ""get"": {} } } }";
+        var newSchema = @"{ ""openapi"": ""3.0.0"", ""paths"": {} }"; // Removed endpoint = breaking
+
+        var oldFile = CreateTempFile(oldSchema);
+        var newFile = CreateTempFile(newSchema);
+
+        var result = RunCli("compare", "--old", $"\"{oldFile}\"", "--new", $"\"{newFile}\"", "--format", "json");
+
+        Assert.Equal(0, result.ExitCode);
+        
+        // Parse the JSON to ensure it's valid
+        var doc = JsonDocument.Parse(result.StdOut);
+        var root = doc.RootElement;
+        
+        Assert.True(root.TryGetProperty("tool", out _));
+        Assert.True(root.TryGetProperty("summary", out _));
+        Assert.True(root.TryGetProperty("findings", out var findings));
+        Assert.Equal(1, findings.GetArrayLength());
+        
+        var firstFinding = findings[0];
+        Assert.Equal("Breaking", firstFinding.GetProperty("severity").GetString());
+        Assert.Equal("ENDPOINT_REMOVED", firstFinding.GetProperty("ruleId").GetString());
+    }
 }

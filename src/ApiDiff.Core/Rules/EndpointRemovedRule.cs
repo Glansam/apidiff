@@ -19,7 +19,10 @@ public sealed class EndpointRemovedRule : IApiDiffRule
             var key = $"{oldEndpoint.Method} {oldEndpoint.Path}";
             if (!newEndpointDict.ContainsKey(key))
             {
-                yield return new DiffEvent($"BREAKING: {key} removed", DiffSeverity.Breaking);
+                yield return new DiffEvent(DiffSeverity.Breaking, "ENDPOINT_REMOVED", $"BREAKING: {key} removed")
+                {
+                    Operation = new DiffOperation { Method = oldEndpoint.Method, Path = oldEndpoint.Path }
+                };
             }
         }
     }

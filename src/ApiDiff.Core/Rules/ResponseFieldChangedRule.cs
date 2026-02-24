@@ -26,11 +26,26 @@ public sealed class ResponseFieldChangedRule : IApiDiffRule
                 {
                     if (!newProps.TryGetValue(prop.Key, out var newProp))
                     {
-                        yield return new DiffEvent($"BREAKING: {key} response removed field '{prop.Key}'", DiffSeverity.Breaking);
+                        yield return new DiffEvent(DiffSeverity.Breaking, "RES_FIELD_REMOVED", $"BREAKING: {key} response removed field '{prop.Key}'")
+                        {
+                            Operation = new DiffOperation { Method = method.ToString().ToUpperInvariant(), Path = path },
+                            Location = new DiffLocation { Area = "responses", ContentType = "application/json" },
+                            Details = new Dictionary<string, object> { { "field", prop.Key } }
+                        };
                     }
                     else if (prop.Value.Type != newProp.Type)
                     {
-                        yield return new DiffEvent($"BREAKING: {key} response field '{prop.Key}' changed type from {prop.Value.Type ?? "null"} to {newProp.Type ?? "null"}", DiffSeverity.Breaking);
+                        yield return new DiffEvent(DiffSeverity.Breaking, "RES_FIELD_TYPE_CHANGED", $"BREAKING: {key} response field '{prop.Key}' changed type from {prop.Value.Type ?? "null"} to {newProp.Type ?? "null"}")
+                        {
+                            Operation = new DiffOperation { Method = method.ToString().ToUpperInvariant(), Path = path },
+                            Location = new DiffLocation { Area = "responses", ContentType = "application/json" },
+                            Details = new Dictionary<string, object> 
+                            { 
+                                { "field", prop.Key },
+                                { "oldType", prop.Value.Type ?? "null" },
+                                { "newType", newProp.Type ?? "null" }
+                            }
+                        };
                     }
                 }
             }

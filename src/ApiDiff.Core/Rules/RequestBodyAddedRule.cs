@@ -22,12 +22,20 @@ public sealed class RequestBodyAddedRule : IApiDiffRule
             {
                 if (newOp.RequestBody.Required)
                 {
-                    yield return new DiffEvent($"BREAKING: {key} added a required request body", DiffSeverity.Breaking);
+                    yield return new DiffEvent(DiffSeverity.Breaking, "REQ_BODY_ADDED", $"BREAKING: {key} added a required request body")
+                    {
+                        Operation = new DiffOperation { Method = method.ToString().ToUpperInvariant(), Path = path },
+                        Location = new DiffLocation { Area = "requestBody", ContentType = "application/json" }
+                    };
                 }
             }
             else if ((oldOp.RequestBody?.Required ?? false) == false && (newOp.RequestBody?.Required ?? false) == true)
             {
-                yield return new DiffEvent($"BREAKING: request body became required for {key}", DiffSeverity.Breaking);
+                yield return new DiffEvent(DiffSeverity.Breaking, "REQ_BODY_BECAME_REQUIRED", $"BREAKING: request body became required for {key}")
+                {
+                    Operation = new DiffOperation { Method = method.ToString().ToUpperInvariant(), Path = path },
+                    Location = new DiffLocation { Area = "requestBody", ContentType = "application/json" }
+                };
             }
         }
     }
