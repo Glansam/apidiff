@@ -178,70 +178,8 @@ class Program
             }
         }, oldOption, newOption, outOption, failOnBreakingOption, formatOption);
 
-        var emailArg = new Argument<string>("email", "The user's email address");
-        var licenseGenerateCommand = new Command("generate", "Generate a new ApiDiff Pro License (Requires APIDIFF_PRIVATE_KEY Env Var)")
-        {
-            emailArg
-        };
-
-        licenseGenerateCommand.SetHandler((email) =>
-        {
-            var privateKeyBase64 = Environment.GetEnvironmentVariable("APIDIFF_PRIVATE_KEY");
-            if (string.IsNullOrWhiteSpace(privateKeyBase64))
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Error.WriteLine("Error: APIDIFF_PRIVATE_KEY environment variable is missing.");
-                Console.ResetColor();
-                Environment.ExitCode = 1;
-                return;
-            }
-
-            try
-            {
-                var payload = new LicensePayload
-                {
-                    Email = email,
-                    ExpirationDate = DateTime.UtcNow.AddYears(1),
-                    Tier = "Pro"
-                };
-
-                var payloadJson = System.Text.Json.JsonSerializer.Serialize(payload, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
-                
-                using var rsa = System.Security.Cryptography.RSA.Create();
-                rsa.ImportRSAPrivateKey(Convert.FromBase64String(privateKeyBase64), out _);
-
-                var payloadBytes = Encoding.UTF8.GetBytes(payloadJson);
-                var signatureBytes = rsa.SignData(payloadBytes, System.Security.Cryptography.HashAlgorithmName.SHA256, System.Security.Cryptography.RSASignaturePadding.Pkcs1);
-
-                var signatureBase64 = Convert.ToBase64String(signatureBytes);
-                var token = $"{payloadJson}.{signatureBase64}";
-
-                // Base64Url encode
-                var finalKey = Convert.ToBase64String(Encoding.UTF8.GetBytes(token))
-                                      .Replace('+', '-').Replace('/', '_').TrimEnd('=');
-
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"License generated for {email}");
-                Console.ResetColor();
-                Console.WriteLine($"\nexport APIDIFF_LICENSE={finalKey}\n");
-            }
-            catch (Exception ex)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Error.WriteLine($"Error generating license: {ex.Message}");
-                Console.ResetColor();
-                Environment.ExitCode = 1;
-            }
-        }, emailArg);
-
-        var licenseCommand = new Command("license", "Manage API Diff licenses")
-        {
-            licenseGenerateCommand
-        };
-
         var rootCommand = new RootCommand("API Breaking Change Detector");
         rootCommand.AddCommand(compareCommand);
-        rootCommand.AddCommand(licenseCommand);
 
         var result = await rootCommand.InvokeAsync(args);
         return Environment.ExitCode != 0 ? Environment.ExitCode : result;
