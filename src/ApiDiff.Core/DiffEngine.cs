@@ -67,12 +67,16 @@ public class DiffEngine
             CommonOperations = commonOperations
         };
 
+        var results = new List<DiffEvent>();
+
         foreach (var rule in _rules)
         {
-            foreach (var diff in rule.Evaluate(context))
-            {
-                yield return diff;
-            }
+            results.AddRange(rule.Evaluate(context));
+        }
+
+        foreach (var diff in results.OrderBy(r => r.Message, StringComparer.OrdinalIgnoreCase))
+        {
+            yield return diff;
         }
     }
 

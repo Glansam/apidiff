@@ -13,6 +13,7 @@ ApiDiff is a lightning-fast CLI tool that compares two OpenAPI/Swagger specifica
 ```bash
 > apidiff compare --old old.json --new new.json
 BREAKING: DELETE /users/{id} removed
+BREAKING: required field 'email' added to request body for POST /users (application/json)
 ```
 
 ### Catch Breaking Changes in CI
