@@ -63,8 +63,8 @@ app.MapPost("/gumroad-webhook", async (HttpRequest request) =>
         var licenseKey = GenerateLicenseKey(email, privateKeyBase64);
         
         // 5. Send Email via Service (TODO: Implement actual sending, e.g. SendGrid)
-        Console.WriteLine($"[Mock Email Send] To: {email}");
-        Console.WriteLine($"[Mock Email Send] Body: Your ApiDiff Pro License Key: {licenseKey}");
+        app.Logger.LogInformation("[Mock Email Send] To: {Email}", email);
+        app.Logger.LogInformation("[Mock Email Send] Body: Your ApiDiff Pro License Key: {LicenseKey}", licenseKey);
 
         return Results.Ok(new { message = "License generated and email dispatched." });
     }
