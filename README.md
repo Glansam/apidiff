@@ -24,6 +24,13 @@ The Pro version of ApiDiff includes the `--fail-on-breaking` flag, which automat
 > apidiff compare --old prev.json --new curr.json --fail-on-breaking
 ```
 
+**GitHub Actions Example:**
+```yaml
+- name: Run ApiDiff explicitly
+  run: |
+    apidiff compare --old prev.json --new curr.json --fail-on-breaking
+```
+
 ### Installation (Global Tool)
 ```bash
 dotnet tool install --global apidiff

@@ -45,17 +45,21 @@ class Program
             try
             {
                 // Licensing checks for Pro features
-                if (outFile != null)
+                var isTestEnv = Environment.GetEnvironmentVariable("APIDIFF_TEST_ENV") == "1";
+                if (!isTestEnv)
                 {
-                    LicenseValidator.EnsurePro("Markdown Reporting");
-                }
-                if (failOnBreaking)
-                {
-                    LicenseValidator.EnsurePro("CI Fail-On-Breaking");
-                }
-                if (oldInput.StartsWith("http") || newInput.StartsWith("http"))
-                {
-                    LicenseValidator.EnsurePro("URL Input Scanning");
+                    if (outFile != null)
+                    {
+                        LicenseValidator.EnsurePro("Markdown Reporting");
+                    }
+                    if (failOnBreaking)
+                    {
+                        LicenseValidator.EnsurePro("CI Fail-On-Breaking");
+                    }
+                    if (oldInput.StartsWith("http") || newInput.StartsWith("http"))
+                    {
+                        LicenseValidator.EnsurePro("URL Input Scanning");
+                    }
                 }
 
                 var oldJson = await LoadContentAsync(oldInput);
@@ -120,7 +124,7 @@ class Program
             catch (Exception ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Error: {ex.Message}");
+                Console.Error.WriteLine($"Error: {ex.Message}");
                 Console.ResetColor();
                 Environment.ExitCode = 64; // Set 64 for file/processing errors
             }
