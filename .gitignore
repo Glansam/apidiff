@@ -1,2 +1,16 @@
 report.md
 .idea/
+
+# Build outputs
+bin/
+obj/
+publish/
+TestResults/
+
+# Rider / IntelliJ
+*.sln.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
