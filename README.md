@@ -58,4 +58,17 @@ dotnet run --project src/ApiDiff.Cli/ApiDiff.Cli.csproj compare --old prev.json 
 
 **🔥 Upgrade to ApiDiff Pro!**
 Get URL/directory scanning, Markdown/HTML reports, CI failure mode, and AI-powered Pull Request summaries.
+
 👉 [Buy ApiDiff Pro here](https://gumroad.com/)
+
+### Activating Pro
+Once you purchase the Pro license on Gumroad, your secure `APIDIFF_LICENSE` key will be automatically generated and emailed to you.
+
+Set it as an environment variable to unlock all Pro features:
+```bash
+# Linux / macOS
+export APIDIFF_LICENSE="eyJlbWFpbCI6...<your_key>..."
+
+# Windows PowerShell
+$env:APIDIFF_LICENSE="eyJlbWFpbCI6...<your_key>..."
+```
