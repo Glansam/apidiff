@@ -25,7 +25,7 @@ The Pro version of ApiDiff includes the `--fail-on-breaking` flag, which automat
 
 ### Installation (Global Tool)
 ```bash
-dotnet tool install --global ApiDiff.Cli
+dotnet tool install --global apidiff
 ```
 
 ### Local Development Usage
