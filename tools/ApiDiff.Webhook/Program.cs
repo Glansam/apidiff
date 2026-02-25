@@ -23,6 +23,13 @@ app.MapPost("/gumroad-webhook", async (HttpRequest request) =>
     var headersDump = string.Join(", ", request.Headers.Select(h => $"{h.Key}: {h.Value}"));
     app.Logger.LogInformation("🔍 Incoming Headers: {Headers}", headersDump);
 
+    // Dump raw body for debugging
+    request.Body.Position = 0;
+    using var reader = new StreamReader(request.Body, leaveOpen: true);
+    var bodyString = await reader.ReadToEndAsync();
+    request.Body.Position = 0;
+    app.Logger.LogInformation("📦 Incoming Body: {Body}", bodyString);
+
     var gumroadSecret = builder.Configuration["GUMROAD_SECRET"];
     if (string.IsNullOrEmpty(gumroadSecret))
     {
