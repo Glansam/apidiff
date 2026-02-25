@@ -18,6 +18,10 @@ app.MapGet("/health", () =>
 app.MapPost("/gumroad-webhook", async (HttpRequest request) =>
 {
     app.Logger.LogInformation("⬇️ Received POST request to /gumroad-webhook");
+    
+    // Dump all headers for debugging
+    var headersDump = string.Join(", ", request.Headers.Select(h => $"{h.Key}: {h.Value}"));
+    app.Logger.LogInformation("🔍 Incoming Headers: {Headers}", headersDump);
 
     var gumroadSecret = builder.Configuration["GUMROAD_SECRET"];
     if (string.IsNullOrEmpty(gumroadSecret))
@@ -66,7 +70,7 @@ app.MapPost("/gumroad-webhook", async (HttpRequest request) =>
     if (string.IsNullOrEmpty(email))
     {
         app.Logger.LogWarning("❌ Email field not found in form data.");
-        return Results.BadRequest(new { error = "Email not found" });
+        return Results.BadRequest(new { error = "Email not found" });[]
     }
 
     app.Logger.LogInformation("✅ Preparing to generate license for: {Email}", email);
