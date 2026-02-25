@@ -39,8 +39,9 @@ app.MapPost("/gumroad-webhook", async (HttpRequest request) =>
     // 3. Validate Signature
     if (!request.Headers.TryGetValue("X-Gumroad-Signature", out var signatureHeader))
     {
-        app.Logger.LogWarning("❌ Missing X-Gumroad-Signature header.");
-        return Results.Unauthorized();
+        // Gumroad's "Send test ping to URL" button often omits the signature header.
+        app.Logger.LogWarning("❌ Missing X-Gumroad-Signature header. If this is a 'Test Ping' from the Gumroad dashboard, this is expected behavior.");
+        return Results.BadRequest(new { error = "Missing signature header. Genuine purchases will have this header." });
     }
 
     var expectedSignature = CreateSignature(body, gumroadSecret);
