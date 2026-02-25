@@ -45,31 +45,51 @@ app.MapPost("/gumroad-webhook", async (HttpRequest request) =>
     // Reset stream position for the next reader (FormReader)
     request.Body.Position = 0;
 
-    // 3. Validate Signature
-    if (!request.Headers.TryGetValue("X-Gumroad-Signature", out var signatureHeader))
-    {
-        // Gumroad's "Send test ping to URL" button often omits the signature header.
-        app.Logger.LogWarning("❌ Missing X-Gumroad-Signature header. If this is a 'Test Ping' from the Gumroad dashboard, this is expected behavior.");
-        return Results.BadRequest(new { error = "Missing signature header. Genuine purchases will have this header." });
-    }
-
-    var expectedSignature = CreateSignature(body, gumroadSecret);
-    if (signatureHeader.ToString() != expectedSignature)
-    {
-        app.Logger.LogWarning("❌ Signature mismatch. Expected: {Expected}, Got: {Actual}", expectedSignature, signatureHeader.ToString());
-        return Results.Unauthorized();
-    }
-    
-    app.Logger.LogInformation("✅ Signature verified successfully.");
-
-    // 4. Parse Form Body
+    // 3. Parse Form Data
     if (!request.HasFormContentType)
     {
-        app.Logger.LogWarning("❌ Unsupported content type: {ContentType}", request.ContentType);
-        return Results.BadRequest(new { error = "Unsupported content type" });
+        app.Logger.LogWarning("❌ Invalid content type. Expected application/x-www-form-urlencoded, got {ContentType}", request.ContentType);
+        return Results.BadRequest(new { error = "Invalid content type" });
     }
 
     var form = await request.ReadFormAsync();
+
+    // 4. Validate Authenticity
+    // Gumroad has two webhook types: 
+    // - Account-level webhooks use HMAC X-Gumroad-Signature headers.
+    // - Product-level "Ping URLs" just send the seller_id in the form body.
+    bool isAuthenticated = false;
+
+    if (request.Headers.TryGetValue("X-Gumroad-Signature", out var signatureHeader))
+    {
+        var expectedSignature = CreateSignature(bodyString, gumroadSecret);
+        if (string.Equals(signatureHeader, expectedSignature, StringComparison.OrdinalIgnoreCase))
+        {
+            app.Logger.LogInformation("✅ Signature verified successfully via X-Gumroad-Signature.");
+            isAuthenticated = true;
+        }
+        else
+        {
+            app.Logger.LogWarning("❌ Signature mismatch. Expected: {Expected}, Received: {Received}", expectedSignature, signatureHeader);
+        }
+    }
+    else if (form.TryGetValue("seller_id", out var sellerId) && sellerId == gumroadSecret)
+    {
+        app.Logger.LogInformation("✅ Signature verified successfully via form seller_id.");
+        isAuthenticated = true;
+    }
+    else
+    {
+        app.Logger.LogWarning("❌ Missing X-Gumroad-Signature header and invalid/missing seller_id in form. This request is unauthorized.");
+        return Results.Unauthorized();
+    }
+
+    if (!isAuthenticated)
+    {
+        return Results.Unauthorized();
+    }
+
+    // 5. Extract Details
     var email = form["email"].ToString();
     
     if (string.IsNullOrEmpty(email))
