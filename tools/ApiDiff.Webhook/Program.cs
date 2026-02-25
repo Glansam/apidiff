@@ -18,6 +18,7 @@ app.MapGet("/health", () =>
 app.MapPost("/gumroad-webhook", async (HttpRequest request) =>
 {
     app.Logger.LogInformation("⬇️ Received POST request to /gumroad-webhook");
+    request.EnableBuffering();
     
     // Dump all headers for debugging
     var headersDump = string.Join(", ", request.Headers.Select(h => $"{h.Key}: {h.Value}"));
@@ -36,9 +37,6 @@ app.MapPost("/gumroad-webhook", async (HttpRequest request) =>
         app.Logger.LogWarning("❌ GUMROAD_SECRET environment variable is missing.");
         return Results.StatusCode(500);
     }
-
-    // 1. Enable buffering so we can read the body twice (once for HMAC, once for Form parsing)
-    request.EnableBuffering();
 
     // 2. Read request body for signature validation
     using var reader = new StreamReader(request.Body, Encoding.UTF8, leaveOpen: true);
