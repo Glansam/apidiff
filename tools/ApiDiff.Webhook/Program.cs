@@ -70,7 +70,7 @@ app.MapPost("/gumroad-webhook", async (HttpRequest request) =>
     if (string.IsNullOrEmpty(email))
     {
         app.Logger.LogWarning("❌ Email field not found in form data.");
-        return Results.BadRequest(new { error = "Email not found" });[]
+        return Results.BadRequest(new { error = "Email not found" });
     }
 
     app.Logger.LogInformation("✅ Preparing to generate license for: {Email}", email);
