@@ -25,8 +25,8 @@ app.MapPost("/gumroad-webhook", async (HttpRequest request) =>
 
     // Dump raw body for debugging
     request.Body.Position = 0;
-    using var reader = new StreamReader(request.Body, leaveOpen: true);
-    var bodyString = await reader.ReadToEndAsync();
+    using var debugReader = new StreamReader(request.Body, leaveOpen: true);
+    var bodyString = await debugReader.ReadToEndAsync();
     request.Body.Position = 0;
     app.Logger.LogInformation("📦 Incoming Body: {Body}", bodyString);
 
